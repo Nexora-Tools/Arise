@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>ARISE // The System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060a10;
+  --panel:#0d1420;
+  --panel-2:#111b2b;
+  --line: rgba(70,200,255,0.22);
+  --line-strong: rgba(70,200,255,0.55);
+  --cyan:#3fe3ff;
+  --cyan-dim:#1d8fae;
+  --violet:#8a63ff;
+  --amber:#ffb020;
+  --danger:#ff4d5e;
+  --success:#33d17a;
+  --text:#e8f4fb;
+  --text-dim:#7f97ab;
+  --text-faint:#4d6478;
+  --font-display:'Orbitron', 'Rajdhani', sans-serif;
+  --font-head:'Rajdhani', sans-serif;
+  --font-body:'Inter', sans-serif;
+  --font-mono:'JetBrains Mono', monospace;
+  --radius: 14px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:var(--font-body);overscroll-behavior:none;}
+body{
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 800px 500px at 50% -10%, rgba(63,227,255,0.10), transparent 60%),
+    radial-gradient(ellipse 600px 400px at 100% 100%, rgba(138,99,255,0.06), transparent 60%);
+  background-attachment: fixed;
+}
+::-webkit-scrollbar{width:0px;height:0px;}
+button{font-family:inherit;}
+h1,h2,h3,h4{font-family:var(--font-head); font-weight:700; letter-spacing:0.02em; margin:0;}
+.mono{font-family:var(--font-mono);}
+.display{font-family:var(--font-display);}
+
+#app{max-width:480px; margin:0 auto; min-height:100vh; position:relative; padding-bottom:86px;}
+
+/* ---------- Utility panel ---------- */
+.panel{
+  background:linear-gradient(180deg, var(--panel-2), var(--panel));
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  position:relative;
+  padding:16px;
+}
+.panel::before{
+  content:'';
+  position:absolute; inset:0; border-radius:var(--radius);
+  box-shadow: inset 0 0 24px rgba(63,227,255,0.04);
+  pointer-events:none;
+}
+.panel-glow{ box-shadow: 0 0 0 1px var(--line), 0 0 24px rgba(63,227,255,0.08); }
+.corner-tag{
+  position:absolute; top:-9px; left:14px; background:var(--bg); padding:0 8px;
+  font-family:var(--font-head); font-size:11px; letter-spacing:0.14em; color:var(--cyan-dim); text-transform:uppercase;
+}
+.btn{
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  border-radius:10px; border:1px solid var(--line-strong);
+  background:rgba(63,227,255,0.08); color:var(--cyan);
+  font-family:var(--font-head); font-weight:700; font-size:15px; letter-spacing:0.05em;
+  padding:13px 18px; cursor:pointer; transition:all .15s ease; text-transform:uppercase;
+}
+.btn:active{transform:scale(0.97); background:rgba(63,227,255,0.18);}
+.btn-solid{ background:var(--cyan); color:#05141c; border-color:var(--cyan);}
+.btn-solid:active{background:#7cecff;}
+.btn-ghost{background:transparent; color:var(--text-dim); border-color:var(--line);}
+.btn-block{width:100%;}
+.btn-sm{padding:9px 14px; font-size:12.5px;}
+.pill{border:1px solid var(--line); border-radius:999px; padding:4px 11px; font-size:11px; font-family:var(--font-head); letter-spacing:0.08em; color:var(--text-dim); text-transform:uppercase;}
+.bar-track{width:100%; height:9px; border-radius:6px; background:#0a1420; border:1px solid var(--line); overflow:hidden;}
+.bar-fill{height:100%; background:linear-gradient(90deg, var(--cyan-dim), var(--cyan)); box-shadow:0 0 8px rgba(63,227,255,0.6); transition:width .5s cubic-bezier(.2,.8,.3,1);}
+.bar-fill.amber{background:linear-gradient(90deg,#a9720f,var(--amber)); box-shadow:0 0 8px rgba(255,176,32,.5);}
+.bar-fill.violet{background:linear-gradient(90deg,#4c31a8,var(--violet)); box-shadow:0 0 8px rgba(138,99,255,.55);}
+.divider{height:1px; background:var(--line); margin:14px 0; opacity:.6;}
+.screen{padding:20px 16px 8px; animation:fadein .35s ease;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+.eyebrow{font-family:var(--font-head); font-size:12px; letter-spacing:0.2em; color:var(--cyan-dim); text-transform:uppercase; margin-bottom:4px;}
+.hidden{display:none !important;}
+a{color:var(--cyan);}
+input,select,textarea{
+  width:100%; background:#0a121c; border:1px solid var(--line); color:var(--text);
+  border-radius:9px; padding:11px 12px; font-family:var(--font-body); font-size:15px; outline:none;
+}
+input:focus,select:focus{border-color:var(--cyan);}
+label.field-label{display:block; font-family:var(--font-head); font-size:12.5px; letter-spacing:0.06em; color:var(--text-dim); margin-bottom:6px; text-transform:uppercase;}
+.field{margin-bottom:14px;}
+.choice-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+.choice-grid.c1{grid-template-columns:1fr;}
+.choice{
+  border:1px solid var(--line); background:#0a121c; border-radius:10px; padding:12px 10px; text-align:center;
+  font-family:var(--font-head); font-size:13.5px; color:var(--text-dim); cursor:pointer; transition:all .12s;
+}
+.choice.sel{border-color:var(--cyan); color:var(--cyan); background:rgba(63,227,255,0.09); box-shadow:0 0 10px rgba(63,227,255,0.15);}
+.choice:active{transform:scale(0.96);}
+
+/* boot / onboarding */
+#boot-screen{min-height:100vh; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:24px;}
+.boot-line{font-family:var(--font-mono); color:var(--cyan-dim); font-size:13px; margin-bottom:6px; opacity:0; animation:typeIn .4s forwards;}
+.boot-title{font-family:var(--font-display); font-size:30px; color:var(--cyan); text-shadow:0 0 20px rgba(63,227,255,0.6); margin:18px 0 6px; opacity:0; animation:typeIn .5s forwards;}
+@keyframes typeIn{ to{opacity:1;} }
+
+.progress-steps{display:flex; gap:5px; margin-bottom:18px;}
+.progress-steps div{flex:1; height:4px; border-radius:2px; background:var(--line);}
+.progress-steps div.done{background:var(--cyan);}
+
+/* dashboard header */
+.topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 16px 4px;}
+.status-online{font-family:var(--font-mono); font-size:11px; color:var(--success); letter-spacing:0.12em; display:flex; align-items:center; gap:6px;}
+.status-dot{width:7px; height:7px; border-radius:50%; background:var(--success); box-shadow:0 0 6px var(--success); animation:pulse 1.6s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+.level-hero{display:flex; align-items:center; gap:14px; padding:6px 4px 14px;}
+.level-badge{
+  width:64px; height:64px; border-radius:50%; border:2px solid var(--cyan);
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  background:radial-gradient(circle, rgba(63,227,255,0.15), transparent 70%);
+  box-shadow:0 0 20px rgba(63,227,255,0.35);
+  font-family:var(--font-display); flex-shrink:0;
+}
+.level-badge .n{font-size:20px; color:var(--cyan); line-height:1;}
+.level-badge .l{font-size:8px; color:var(--text-dim); letter-spacing:0.1em;}
+.hero-name{font-size:19px;}
+.hero-sub{font-size:12px; color:var(--text-dim); font-family:var(--font-mono); margin-top:2px;}
+
+.stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:14px;}
+.stat-tile{background:#0a121c; border:1px solid var(--line); border-radius:10px; padding:10px 6px; text-align:center;}
+.stat-tile .v{font-family:var(--font-mono); font-weight:700; font-size:17px; color:var(--cyan);}
+.stat-tile .k{font-size:10px; color:var(--text-dim); letter-spacing:0.08em; text-transform:uppercase; margin-top:2px;}
+
+.section-title{display:flex; align-items:center; justify-content:space-between; margin:22px 0 10px;}
+.section-title h2{font-size:15px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text);}
+
+.quest-card{padding:16px;}
+.quest-header{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;}
+.quest-header .diff{font-family:var(--font-display); font-size:22px; color:var(--violet); text-shadow:0 0 10px rgba(138,99,255,0.6);}
+.exercise-row{display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px dashed var(--line);}
+.exercise-row:last-child{border-bottom:none;}
+.exercise-row .name{font-family:var(--font-head); font-weight:600; font-size:15px;}
+.exercise-row .meta{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+.exercise-row .val{font-family:var(--font-mono); color:var(--cyan); font-size:14px; text-align:right;}
+.exercise-row .val.done{color:var(--success);}
+.check{width:22px; height:22px; border-radius:6px; border:1.5px solid var(--line-strong); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right:10px; cursor:pointer; font-size:13px; color:transparent;}
+.check.on{background:var(--success); border-color:var(--success); color:#05140b;}
+.exercise-flex{display:flex; align-items:center; flex:1;}
+
+.warn-banner{
+  border:1px solid rgba(255,176,32,0.5); background:rgba(255,176,32,0.07); border-radius:10px;
+  padding:12px; font-size:12.5px; color:#ffd580; line-height:1.5; margin-bottom:12px;
+}
+.danger-banner{
+  border:1px solid rgba(255,77,94,0.55); background:rgba(255,77,94,0.08); border-radius:10px;
+  padding:14px; font-size:13px; color:#ffb3ba; line-height:1.55;
+}
+
+.nav{
+  position:fixed; bottom:0; left:0; right:0; max-width:480px; margin:0 auto;
+  background:rgba(9,14,22,0.92); backdrop-filter:blur(14px); border-top:1px solid var(--line);
+  display:flex; padding:8px 4px calc(8px + env(safe-area-inset-bottom));
+  z-index:40;
+}
+.nav-item{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px; color:var(--text-faint); cursor:pointer;}
+.nav-item.active{color:var(--cyan);}
+.nav-item svg{width:20px; height:20px;}
+.nav-item .lbl{font-family:var(--font-head); font-size:10px; letter-spacing:0.05em; text-transform:uppercase;}
+
+.exlib-item{display:flex; gap:12px; padding:12px; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer; background:#0a121c;}
+.exlib-item .ic{width:42px;height:42px;border-radius:8px;background:rgba(63,227,255,0.1);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.exlib-item .body{flex:1;}
+.exlib-item .t{font-family:var(--font-head); font-weight:600; font-size:14.5px;}
+.exlib-item .m{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+
+.timer-screen{position:fixed; inset:0; background:#03060a; z-index:100; display:flex; flex-direction:column; max-width:480px; margin:0 auto;}
+.timer-top{padding:16px; display:flex; justify-content:space-between; align-items:center;}
+.timer-mid{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:20px;}
+.ring-wrap{position:relative; width:230px; height:230px; margin-bottom:22px;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-num{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column;}
+.ring-num .t{font-family:var(--font-mono); font-size:44px; font-weight:700; color:var(--cyan); text-shadow:0 0 18px rgba(63,227,255,0.5);}
+.ring-num .l{font-size:11px; color:var(--text-dim); letter-spacing:0.15em; text-transform:uppercase; margin-top:4px;}
+.timer-controls{display:flex; gap:10px; padding:20px; padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+
+.modal-backdrop{position:fixed; inset:0; background:rgba(2,4,8,0.82); backdrop-filter:blur(4px); z-index:90; display:flex; align-items:flex-end; justify-content:center;}
+.modal-sheet{width:100%; max-width:480px; background:var(--panel); border:1px solid var(--line); border-top-left-radius:20px; border-top-right-radius:20px; padding:22px 18px calc(22px + env(safe-area-inset-bottom)); animation:slideup .3s ease;}
+@keyframes slideup{from{transform:translateY(30px); opacity:0;} to{transform:translateY(0); opacity:1;}}
+
+.levelup-overlay{position:fixed; inset:0; background:#000; z-index:110; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; max-width:480px; margin:0 auto;}
+.levelup-overlay .sys{font-family:var(--font-display); color:var(--cyan-dim); letter-spacing:0.3em; font-size:13px; margin-bottom:10px;}
+.levelup-overlay .lu{font-family:var(--font-display); font-size:34px; color:var(--cyan); text-shadow:0 0 30px rgba(63,227,255,0.8); margin-bottom:18px;}
+.levelup-overlay .transition{font-family:var(--font-mono); font-size:20px; color:var(--text-dim); margin-bottom:26px;}
+.levelup-overlay .transition b{color:var(--cyan); font-size:24px;}
+.levelup-overlay .gains{display:flex; flex-direction:column; gap:6px; margin-bottom:30px; font-family:var(--font-mono); font-size:14px; color:var(--success);}
+
+.ach-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.ach-item{text-align:center;}
+.ach-hex{width:100%; aspect-ratio:1; border-radius:16px; background:#0a121c; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:6px;}
+.ach-hex.unlocked{border-color:var(--cyan); background:rgba(63,227,255,0.08); box-shadow:0 0 12px rgba(63,227,255,0.2);}
+.ach-item .t{font-size:10.5px; color:var(--text-faint); line-height:1.3;}
+.ach-item.unlocked .t{color:var(--text-dim);}
+
+.rank-hex{width:150px; height:150px; margin:10px auto 18px; position:relative;}
+.toast{position:fixed; top:16px; left:50%; transform:translateX(-50%); background:var(--panel-2); border:1px solid var(--line-strong); border-radius:10px; padding:11px 18px; font-family:var(--font-head); font-size:13px; color:var(--cyan); z-index:200; box-shadow:0 6px 20px rgba(0,0,0,.5); max-width:88%; text-align:center;}
+
+.log-item{border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:8px; background:#0a121c;}
+.log-item .top{display:flex; justify-content:space-between; font-family:var(--font-head); font-size:13.5px;}
+.log-item .date{color:var(--text-faint); font-size:11px; margin-top:2px;}
+.log-item .xp{color:var(--cyan); font-family:var(--font-mono);}
+
+.small-note{font-size:11.5px; color:var(--text-faint); line-height:1.5; margin-top:6px;}
+.link-btn{background:none;border:none;color:var(--cyan-dim);font-family:var(--font-head);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;}
+.toggle{width:44px;height:25px;border-radius:14px;background:#0a121c;border:1px solid var(--line);position:relative;cursor:pointer;flex-shrink:0;}
+.toggle .knob{position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;background:var(--text-faint);transition:all .18s;}
+.toggle.on{background:rgba(63,227,255,0.15); border-color:var(--cyan);}
+.toggle.on .knob{left:21px; background:var(--cyan);}
+.settings-row{display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--line);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row .t{font-family:var(--font-head); font-size:14.5px;}
+.settings-row .s{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+
+.chip-row{display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;}
+.chip{flex-shrink:0; border:1px solid var(--line); border-radius:999px; padding:7px 13px; font-size:12.5px; font-family:var(--font-head); color:var(--text-dim); cursor:pointer;}
+.chip.sel{border-color:var(--cyan); color:var(--cyan); background:rgba(63,227,255,0.08);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ================= BOOT / ONBOARDING ================= -->
+  <div id="onboarding"></div>
+
+  <!-- ================= MAIN APP ================= -->
+  <div id="main-app" class="hidden">
+    <div class="topbar">
+      <div class="status-online"><span class="status-dot"></span>SYSTEM ONLINE</div>
+      <div class="pill" id="topbar-rank">RANK E</div>
+    </div>
+    <div id="screen-root"></div>
+    <div class="nav" id="bottom-nav"></div>
+  </div>
+
+  <!-- overlays injected dynamically -->
+  <div id="overlay-root"></div>
+</div>
+
+<script>
+/* =====================================================================
+   ARISE — SYSTEM CORE
+   A self-contained fitness RPG engine. All data persists to localStorage.
+===================================================================== */
+
+const LS_KEY = 'arise_system_state_v1';
+
+/* ---------- Exercise Database ---------- */
+const EXO = {
+  pushup:{name:'Push-Up',group:'Upper Body',primary:'Chest',secondary:['Triceps','Shoulders'],equip:'None',diff:1,pattern:'Push',
+    instr:['Hands slightly wider than shoulders, body in a straight line from head to heels.','Lower your chest to just above the floor, elbows at ~45°.','Breathe in on the way down, exhale as you press back up.','Controlled tempo — avoid bouncing at the bottom.','Finish with arms extended, core braced.'],
+    mistakes:['Sagging hips','Flaring elbows to 90°','Partial range of motion','Holding breath the whole rep'],
+    beginnerMod:'Incline push-up (hands on a bench/counter) or knee push-up.', advancedProg:'Deficit push-up or archer push-up.'},
+  inclinepushup:{name:'Incline Push-Up',group:'Upper Body',primary:'Chest',secondary:['Triceps'],equip:'None',diff:0,pattern:'Push',
+    instr:['Place hands on a stable elevated surface.','Keep body straight, lower chest toward the surface.','Press back up with control.','Higher surface = easier variation.','Keep core braced throughout.'],
+    mistakes:['Surface not stable','Hips sagging','Rushing the rep'],
+    beginnerMod:'Use a higher surface (wall) for less load.', advancedProg:'Progress to standard push-up.'},
+  squat:{name:'Bodyweight Squat',group:'Lower Body',primary:'Quads',secondary:['Glutes','Hamstrings'],equip:'None',diff:1,pattern:'Squat',
+    instr:['Feet shoulder-width, toes slightly out.','Push hips back and bend knees to descend.','Keep chest up, weight through mid-foot.','Descend to at least parallel if mobility allows.','Drive up through the heels.'],
+    mistakes:['Knees caving inward','Heels lifting off ground','Rounding the lower back','Not reaching depth'],
+    beginnerMod:'Box squat (sit to a chair) or reduce depth.', advancedProg:'Goblet squat or jump squat.'},
+  gobletsquat:{name:'Goblet Squat',group:'Lower Body',primary:'Quads',secondary:['Glutes','Core'],equip:'Dumbbell',diff:2,pattern:'Squat',
+    instr:['Hold a dumbbell vertically at chest height.','Squat down keeping elbows inside knees.','Chest tall, core braced.','Drive up through the whole foot.','Keep the weight close to your body.'],
+    mistakes:['Weight drifting away from chest','Rounding upper back','Rushing the descent'],
+    beginnerMod:'Reduce weight or use bodyweight only.', advancedProg:'Front-rack squat with two dumbbells.'},
+  plank:{name:'Plank',group:'Core',primary:'Core',secondary:['Shoulders'],equip:'None',diff:1,pattern:'Isometric',
+    instr:['Forearms on the floor, elbows under shoulders.','Body in a straight line, glutes and abs braced.','Neutral neck, eyes toward the floor.','Breathe steadily — do not hold your breath.','Hold for the prescribed time.'],
+    mistakes:['Hips sagging or piking up','Holding breath','Neck craning forward'],
+    beginnerMod:'Knee plank.', advancedProg:'Plank with shoulder taps or long-lever plank.'},
+  walk:{name:'Brisk Walk',group:'Cardio',primary:'Cardiovascular',secondary:['Legs'],equip:'None',diff:0,pattern:'Cardio',
+    instr:['Maintain a pace where talking is possible but slightly effortful.','Swing arms naturally.','Keep a tall, relaxed posture.','Land midfoot, roll through to toe-off.'],
+    mistakes:['Overstriding','Hunched posture'],
+    beginnerMod:'Shorter duration or slower pace.', advancedProg:'Add incline or intervals.'},
+  row:{name:'Bent-Over Row',group:'Upper Body',primary:'Back',secondary:['Biceps','Rear Delts'],equip:'Dumbbells',diff:2,pattern:'Pull',
+    instr:['Hinge at the hips, back flat, dumbbells hanging.','Pull elbows back, squeezing shoulder blades.','Lower with control.','Keep neck neutral throughout.'],
+    mistakes:['Rounding the back','Using momentum/jerking the weight','Shrugging instead of rowing'],
+    beginnerMod:'Resistance-band row or single-arm supported row.', advancedProg:'Pendlay row.'},
+  dumbbellcurl:{name:'Dumbbell Curl',group:'Upper Body',primary:'Biceps',secondary:[],equip:'Dumbbells',diff:1,pattern:'Pull',
+    instr:['Stand tall, dumbbells at sides, palms forward.','Curl up without swinging the torso.','Squeeze at the top.','Lower slowly under control.'],
+    mistakes:['Using body momentum','Partial range of motion','Elbows drifting forward'],
+    beginnerMod:'Lighter weight, seated to remove momentum.', advancedProg:'Hammer curl or slow-eccentric curl.'},
+  hammercurl:{name:'Hammer Curl',group:'Upper Body',primary:'Biceps',secondary:['Forearms'],equip:'Dumbbells',diff:1,pattern:'Pull',
+    instr:['Dumbbells at sides, palms facing in (neutral grip).','Curl straight up keeping elbows tucked.','Squeeze briefly at the top.','Lower with control.'],
+    mistakes:['Swinging the weight','Elbows flaring out'],
+    beginnerMod:'Reduce load.', advancedProg:'Slow tempo or heavier load.'},
+  gluteBridge:{name:'Glute Bridge',group:'Lower Body',primary:'Glutes',secondary:['Hamstrings'],equip:'None',diff:0,pattern:'Hinge',
+    instr:['Lie on your back, knees bent, feet flat.','Drive hips up by squeezing glutes.','Pause at the top, avoid overarching the lower back.','Lower with control.'],
+    mistakes:['Overextending the lower back','Using heels only weakly'],
+    beginnerMod:'Reduce range of motion.', advancedProg:'Single-leg glute bridge.'},
+  situp:{name:'Sit-Up',group:'Core',primary:'Abdominals',secondary:['Hip Flexors'],equip:'None',diff:1,pattern:'Flexion',
+    instr:['Lie on your back, knees bent, feet anchored or flat.','Curl your torso up toward your knees.','Exhale on the way up.','Lower with control, do not let momentum take over.'],
+    mistakes:['Yanking the neck forward','Using momentum instead of control'],
+    beginnerMod:'Crunch (partial range) instead of full sit-up.', advancedProg:'Weighted sit-up.'},
+  jumprope:{name:'Jump Rope',group:'Cardio',primary:'Cardiovascular',secondary:['Calves'],equip:'Jump Rope',diff:2,pattern:'Cardio',
+    instr:['Keep jumps low, land softly on the balls of the feet.','Elbows close to the body, rotate from the wrists.','Maintain a steady rhythm.'],
+    mistakes:['Jumping too high','Landing flat-footed'],
+    beginnerMod:'Do the arm/footwork rhythm without a rope first.', advancedProg:'Double-unders or interval sprints.'},
+  splitsquat:{name:'Reverse Lunge',group:'Lower Body',primary:'Quads',secondary:['Glutes'],equip:'None',diff:2,pattern:'Lunge',
+    instr:['Step one foot back, lower the back knee toward the floor.','Front shin stays roughly vertical.','Push through the front heel to return.','Alternate legs.'],
+    mistakes:['Front knee traveling far past toes with instability','Short, unstable step'],
+    beginnerMod:'Hold onto a wall/chair for balance, reduce depth.', advancedProg:'Add dumbbells or elevate the rear foot.'},
+};
+
+/* ---------- Achievement definitions ---------- */
+const ACHIEVEMENTS = [
+  {id:'first_quest', name:'First Quest', icon:'⚔️', desc:'Complete your first daily quest.'},
+  {id:'first_workout', name:'First Workout', icon:'🏋️', desc:'Log your first workout.'},
+  {id:'streak7', name:'7 Day Streak', icon:'🔥', desc:'Maintain a 7-day streak.'},
+  {id:'streak30', name:'30 Day Streak', icon:'🌋', desc:'Maintain a 30-day streak.'},
+  {id:'workouts100', name:'100 Workouts', icon:'💯', desc:'Complete 100 workouts.'},
+  {id:'first_pr', name:'First Personal Record', icon:'📈', desc:'Set your first PR.'},
+  {id:'reps1000', name:'1000 Total Reps', icon:'🔢', desc:'Accumulate 1000 total reps.'},
+  {id:'hours10', name:'10 Hours Training', icon:'⏱️', desc:'Log 10 hours of training time.'},
+  {id:'consistency', name:'Consistency King', icon:'👑', desc:'Complete 5 quests in a single week.'},
+  {id:'early', name:'Early Awakening', icon:'🌅', desc:'Complete a quest before 8 AM.'},
+  {id:'boss1', name:'Boss Defeated', icon:'🐉', desc:'Complete your first Boss Battle.'},
+  {id:'rankd', name:'Rank D Reached', icon:'🔷', desc:'Reach Rank D.'},
+];
+
+/* ---------- Level curve ---------- */
+function xpForLevel(level){
+  // gradually increasing curve
+  return Math.round(50 * Math.pow(level, 1.9));
+}
+function totalXpAtLevel(level){
+  let t=0; for(let i=1;i<level;i++) t+=xpForLevel(i); return t;
+}
+
+/* ---------- State ---------- */
+let state = null;
+function defaultState(){
+  return {
+    onboarded:false,
+    profile:null, // {name,age,sex,heightCm,weightKg,goal,fitnessLevel,activityLevel,equipment,timeMin,daysPerWeek,injuries,medicalFlag}
+    level:1,
+    xp:0,
+    streak:0,
+    lastQuestDate:null,
+    rank:'E',
+    stats:{strength:5,endurance:5,agility:5,vitality:5,discipline:5},
+    achievements:[],
+    workoutLog:[], // {date, exercises:[{key,sets,reps,weight}], durationMin, rpe, calories, xp, status}
+    prs:{}, // key -> {value, label, date}
+    todayQuest:null,
+    questHistoryDates:[],
+    missedStreakForNotice:0,
+    weightLog:[], // {date, weightKg}
+    settings:{units:'metric', sound:true, animations:true, notifications:true, reduceMotion:false},
+    lastMuscleGroups:[], // for adaptive rotation
+    dayCount:0,
+    fatigueReports:[], // recent RPE/fatigue reports
+  };
+}
+function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ state = JSON.parse(raw); return true; }
+  }catch(e){}
+  state = defaultState();
+  return false;
+}
+
+/* ---------- Calorie / Nutrition math ---------- */
+function calcBMR(p){
+  const w = p.weightKg, h = p.heightCm, a = p.age;
+  const base = 10*w + 6.25*h - 5*a;
+  return p.sex === 'male' ? base + 5 : base - 161;
+}
+const ACTIVITY_MULT = {sedentary:1.2, light:1.375, moderate:1.55, veryactive:1.725};
+function calcTDEE(p){
+  return calcBMR(p) * (ACTIVITY_MULT[p.activityLevel] || 1.375);
+}
+function calcCalorieTarget(p){
+  const tdee = calcTDEE(p);
+  let target = tdee;
+  if(p.goal === 'fatloss') target = tdee - Math.min(500, tdee*0.20);
+  else if(p.goal === 'musclegain') target = tdee + Math.min(350, tdee*0.15);
+  else if(p.goal === 'recomp') target = tdee - 150;
+  return Math.round(target);
+}
+function calcMacros(p, calorieTarget){
+  const proteinPerKg = p.goal === 'musclegain' || p.goal === 'strength' ? 2.0 : 1.8;
+  const proteinG = Math.round(p.weightKg * proteinPerKg);
+  const fatCals = calorieTarget * 0.28;
+  const fatG = Math.round(fatCals/9);
+  const proteinCals = proteinG*4;
+  const carbCals = Math.max(0, calorieTarget - proteinCals - fatCals);
+  const carbG = Math.round(carbCals/4);
+  return {proteinG, carbG, fatG};
+}
+function unsafeCalorieCheck(p, target){
+  const bmr = calcBMR(p);
+  return target < bmr * 0.85 || target < (p.sex==='male'?1500:1200);
+}
+const MET = {pushup:8, inclinepushup:5, squat:5, gobletsquat:5.5, plank:3, walk:3.5, row:4, dumbbellcurl:3, hammercurl:3, gluteBridge:3, situp:4, jumprope:11, splitsquat:5};
+function estimateCaloriesForExercise(key, weightKg, minutes){
+  const met = MET[key] || 4;
+  const perMin = met * 3.5 * weightKg / 200;
+  return perMin * minutes;
+}
+
+/* ---------- Quest generation engine ---------- */
+function determineDifficultyTier(level){
+  if(level<8) return 'E';
+  if(level<18) return 'D';
+  if(level<30) return 'C';
+  if(level<45) return 'B';
+  if(level<65) return 'A';
+  if(level<85) return 'S';
+  if(level<98) return 'SS';
+  return 'SSS';
+}
+function shouldRestToday(){
+  const p = state.profile;
+  const daysPerWeek = p.daysPerWeek;
+  // simple rotation: rest days spread across week based on daysPerWeek
+  const dow = new Date().getDay();
+  const restPattern = {
+    1:[0,1,2,3,5,6], 2:[0,2,3,4,6], 3:[0,2,4,6], 4:[0,3,5],
+    5:[3], 6:[3], 7:[]
+  };
+  const restDays = restPattern[Math.min(7,Math.max(1,daysPerWeek))] || [0,3,6];
+  return restDays.includes(dow);
+}
+function pickExercisesForGroup(group, equipmentAvail){
+  return Object.entries(EXO).filter(([k,e])=> e.group===group && (e.equip==='None' || equipmentAvail.includes(e.equip)));
+}
+function recentFatigueHigh(){
+  const recent = state.fatigueReports.slice(-3);
+  if(recent.length<2) return false;
+  const highs = recent.filter(f=>f==='High').length;
+  return highs>=2;
+}
+function generateDailyQuest(){
+  const p = state.profile;
+  if(!p) return null;
+
+  const equipmentAvail = p.equipment;
+  const level = state.level;
+  const fitnessLevel = p.fitnessLevel;
+  const isRestDay = shouldRestToday() || recentFatigueHigh();
+
+  // volume scale factor based on fitness level & level
+  let baseFactor = fitnessLevel==='beginner'||fitnessLevel==='complete beginner' ? 0.6 : fitnessLevel==='intermediate' ? 1.0 : 1.35;
+  // small week-cycle progression (4-week wave): weeks 1-3 climb, week 4 deload
+  const weekInCycle = (Math.floor(state.dayCount/7) % 4) + 1;
+  const cycleFactor = weekInCycle===1?0.85:weekInCycle===2?1.0:weekInCycle===3?1.12:0.75; // week4 deload
+  const levelFactor = 1 + Math.min(1.2, level*0.012);
+  const factor = baseFactor * cycleFactor * levelFactor;
+
+  if(isRestDay){
+    const quest = {
+      type:'recovery',
+      title:'Recovery Protocol',
+      difficulty: determineDifficultyTier(level),
+      exercises:[
+        {key:'walk', sets:1, reps:null, durationMin:20, unit:'min'},
+      ],
+      extras:['Light mobility / stretching (10 min)','Hydration: aim for consistent water intake today','Sleep: prioritize 7–9 hours tonight'],
+      estMinutes:20,
+      estXP: 60,
+      rest:true
+    };
+    return quest;
+  }
+
+  // rotate muscle groups: don't repeat yesterday's primary group
+  const groupPool = ['Upper Body','Lower Body','Core','Cardio'];
+  const avoid = state.lastMuscleGroups[state.lastMuscleGroups.length-1];
+  let todayGroups;
+  if(p.goal==='endurance') todayGroups=['Cardio','Core'];
+  else if(state.dayCount % 3 === 2) todayGroups=['Core','Cardio'];
+  else if(avoid==='Upper Body') todayGroups=['Lower Body','Core'];
+  else if(avoid==='Lower Body') todayGroups=['Upper Body','Core'];
+  else todayGroups=['Upper Body','Lower Body'];
+
+  const exercises=[];
+  todayGroups.forEach(g=>{
+    const opts = pickExercisesForGroup(g, equipmentAvail);
+    if(opts.length===0) return;
+    const [key, ex] = opts[Math.floor(Math.random()*opts.length)];
+    let sets=3, reps;
+    if(ex.pattern==='Isometric'){
+      reps=null;
+      const dur = Math.round((15 + factor*15));
+      exercises.push({key, sets:3, reps:null, durationSec:Math.min(60,Math.max(15,dur)), unit:'sec'});
+      return;
+    }
+    if(ex.pattern==='Cardio'){
+      const dur = Math.round(10 + factor*15);
+      exercises.push({key, sets:1, reps:null, durationMin:Math.min(30,Math.max(8,dur)), unit:'min'});
+      return;
+    }
+    reps = Math.round(6 + factor*8);
+    reps = Math.min(20, Math.max(5, reps));
+    exercises.push({key, sets, reps, unit:'reps'});
+  });
+
+  // core finisher sometimes
+  if(!todayGroups.includes('Core') && Math.random()>0.4){
+    exercises.push({key:'plank', sets:3, reps:null, durationSec:Math.min(45,Math.max(15,Math.round(15+factor*15))), unit:'sec'});
+  }
+
+  const estMinutes = exercises.reduce((s,e)=>{
+    if(e.unit==='min') return s+e.durationMin;
+    if(e.unit==='sec') return s + (e.sets*e.durationSec)/60 + e.sets*1;
+    return s + (e.sets*1.2) + e.sets*0.7; // rough time per set incl rest
+  }, 3);
+
+  const cappedMinutes = Math.min(p.timeMin, Math.max(10, Math.round(estMinutes)));
+
+  const estXP = Math.round(60 + factor*70);
+
+  return {
+    type:'training',
+    title:'Daily Quest',
+    difficulty: determineDifficultyTier(level),
+    exercises,
+    estMinutes: cappedMinutes,
+    estXP,
+    rest:false
+  };
+}
+
+/* ---------- Onboarding flow ---------- */
+const OB = {
+  step:0,
+  data:{ equipment:[] }
+};
+
+function renderOnboarding(){
+  const root = document.getElementById('onboarding');
+  root.classList.remove('hidden');
+  document.getElementById('main-app').classList.add('hidden');
+
+  if(OB.step===0){
+    root.innerHTML = bootHTML();
+    setTimeout(()=>{ OB.step=1; renderOnboarding(); }, 2600);
+    return;
+  }
+  if(OB.step===1){ root.innerHTML = medicalScreenHTML(); return; }
+  if(OB.step===2){ root.innerHTML = playerInfoHTML(); return; }
+  if(OB.step===3){ root.innerHTML = goalFitnessHTML(); return; }
+  if(OB.step===4){ root.innerHTML = equipmentTimeHTML(); return; }
+  if(OB.step===5){ root.innerHTML = summaryHTML(); return; }
+}
+
+function bootHTML(){
+  return `
+  <div id="boot-screen">
+    <div class="boot-line" style="animation-delay:.1s">INITIALIZING SYSTEM CORE...</div>
+    <div class="boot-line" style="animation-delay:.5s">SCANNING PLAYER SIGNATURE...</div>
+    <div class="boot-line" style="animation-delay:.9s">CALIBRATING QUEST ENGINE...</div>
+    <div class="boot-title" style="animation-delay:1.4s">SYSTEM ONLINE</div>
+    <div class="boot-line" style="animation-delay:1.9s; color:var(--text-dim)">PLAYER QUALIFICATION IN PROGRESS...</div>
+  </div>`;
+}
+
+function stepShell(inner, stepIdx, total){
+  const steps = Array.from({length:total},(_,i)=>`<div class="${i<stepIdx?'done':''}"></div>`).join('');
+  return `
+  <div class="screen">
+    <div class="progress-steps">${steps}</div>
+    ${inner}
+  </div>`;
+}
+
+function medicalScreenHTML(){
+  return stepShell(`
+    <div class="eyebrow">Safety Screening</div>
+    <h2 style="font-size:22px; margin-bottom:14px;">Before We Begin</h2>
+    <p style="font-size:13.5px; color:var(--text-dim); line-height:1.6; margin-bottom:16px;">
+      The System needs to know if any medical caution is required before generating your training plan. This is a screening step, not a diagnosis.
+    </p>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="field">
+        <label class="field-label">Do you have any diagnosed heart, lung, or other condition that limits exercise?</label>
+        <div class="choice-grid" id="q-cond">
+          <div class="choice" data-v="no">No</div>
+          <div class="choice" data-v="yes">Yes</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Chest pain, fainting, or severe shortness of breath during activity?</label>
+        <div class="choice-grid" id="q-symptom">
+          <div class="choice" data-v="no">No</div>
+          <div class="choice" data-v="yes">Yes</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Any current injury or a doctor-imposed exercise restriction?</label>
+        <div class="choice-grid" id="q-injury">
+          <div class="choice" data-v="no">No</div>
+          <div class="choice" data-v="yes">Yes</div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">Pregnant, or is pregnancy a current consideration? (skip if not applicable)</label>
+        <div class="choice-grid" id="q-preg">
+          <div class="choice" data-v="no">No / N/A</div>
+          <div class="choice" data-v="yes">Yes</div>
+        </div>
+      </div>
+    </div>
+    <div id="medical-warning" class="danger-banner hidden" style="margin-bottom:14px;">
+      <b>SAFETY WARNING</b><br>Your information indicates that professional medical guidance may be appropriate before starting a training plan. The System will still let you continue with a conservative, low-intensity approach, but please consult a doctor before increasing intensity.
+    </div>
+    <button class="btn btn-solid btn-block" id="med-continue">Continue</button>
+  `, 1, 5);
+}
+
+function goalFitnessHTML(){
+  const g = OB.data;
+  return stepShell(`
+    <div class="eyebrow">Player Information</div>
+    <h2 style="font-size:22px; margin-bottom:14px;">Your Objective</h2>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="field">
+        <label class="field-label">Primary Goal</label>
+        <div class="choice-grid" id="q-goal">
+          <div class="choice" data-v="fatloss">Fat Loss</div>
+          <div class="choice" data-v="musclegain">Muscle Gain</div>
+          <div class="choice" data-v="strength">Strength</div>
+          <div class="choice" data-v="general">General Fitness</div>
+          <div class="choice" data-v="endurance">Endurance</div>
+          <div class="choice" data-v="recomp">Body Recomposition</div>
+          <div class="choice" data-v="maintain">Maintain Weight</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Fitness Level</label>
+        <div class="choice-grid" id="q-fitlevel">
+          <div class="choice" data-v="complete beginner">Complete Beginner</div>
+          <div class="choice" data-v="beginner">Beginner</div>
+          <div class="choice" data-v="intermediate">Intermediate</div>
+          <div class="choice" data-v="advanced">Advanced</div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">Current Activity Level</label>
+        <div class="choice-grid" id="q-activity">
+          <div class="choice" data-v="sedentary">Sedentary</div>
+          <div class="choice" data-v="light">Lightly Active</div>
+          <div class="choice" data-v="moderate">Moderately Active</div>
+          <div class="choice" data-v="veryactive">Very Active</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-solid btn-block" id="goal-continue">Continue</button>
+  `, 3, 5);
+}
+
+function playerInfoHTML(){
+  return stepShell(`
+    <div class="eyebrow">Enter Player Information</div>
+    <h2 style="font-size:22px; margin-bottom:14px;">Who Are You?</h2>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="field">
+        <label class="field-label">Player Name</label>
+        <input type="text" id="in-name" placeholder="Enter name" maxlength="20">
+      </div>
+      <div class="field">
+        <label class="field-label">Sex</label>
+        <div class="choice-grid" id="q-sex">
+          <div class="choice" data-v="male">Male</div>
+          <div class="choice" data-v="female">Female</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Age</label>
+        <input type="number" id="in-age" placeholder="e.g. 24" min="13" max="90">
+      </div>
+      <div class="field">
+        <label class="field-label">Height (cm)</label>
+        <input type="number" id="in-height" placeholder="e.g. 175" min="120" max="230">
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">Weight (kg)</label>
+        <input type="number" id="in-weight" placeholder="e.g. 70" min="30" max="250">
+      </div>
+    </div>
+    <div id="info-error" class="warn-banner hidden" style="margin-bottom:14px;"></div>
+    <button class="btn btn-solid btn-block" id="info-continue">Continue</button>
+  `, 2, 5);
+}
+
+function equipmentTimeHTML(){
+  return stepShell(`
+    <div class="eyebrow">Training Setup</div>
+    <h2 style="font-size:22px; margin-bottom:14px;">Your Resources</h2>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="field">
+        <label class="field-label">Available Equipment (select all that apply)</label>
+        <div class="choice-grid" id="q-equip">
+          <div class="choice" data-v="None">No Equipment</div>
+          <div class="choice" data-v="Dumbbells">Dumbbells</div>
+          <div class="choice" data-v="Resistance Band">Resistance Bands</div>
+          <div class="choice" data-v="Pull-up Bar">Pull-up Bar</div>
+          <div class="choice" data-v="Jump Rope">Jump Rope</div>
+          <div class="choice" data-v="Full Gym">Full Gym</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Available Time Per Session</label>
+        <div class="choice-grid" id="q-time">
+          <div class="choice" data-v="10">10 min</div>
+          <div class="choice" data-v="20">20 min</div>
+          <div class="choice" data-v="30">30 min</div>
+          <div class="choice" data-v="45">45 min</div>
+          <div class="choice" data-v="60">60+ min</div>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label class="field-label">Training Days Per Week</label>
+        <div class="choice-grid" id="q-days">
+          <div class="choice" data-v="2">2</div>
+          <div class="choice" data-v="3">3</div>
+          <div class="choice" data-v="4">4</div>
+          <div class="choice" data-v="5">5</div>
+          <div class="choice" data-v="6">6</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-solid btn-block" id="equip-continue">Continue</button>
+  `, 4, 5);
+}
+
+function summaryHTML(){
+  const p = OB.data;
+  const bmr = calcBMR(p);
+  const tdee = calcTDEE(p);
+  const target = calcCalorieTarget(p);
+  const unsafe = unsafeCalorieCheck(p, target);
+  const macros = calcMacros(p, target);
+  return stepShell(`
+    <div class="eyebrow">System Initialization Complete</div>
+    <h2 style="font-size:22px; margin-bottom:6px;">Fitness Profile Created</h2>
+    <p style="font-size:13px; color:var(--text-dim); margin-bottom:16px;">Daily quests have been generated.</p>
+    <div class="panel panel-glow" style="margin-bottom:14px;">
+      <div class="corner-tag">Energy Estimate</div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <span style="color:var(--text-dim); font-size:13px;">BMR</span>
+        <span class="mono" style="color:var(--text);">${Math.round(bmr)} kcal</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+        <span style="color:var(--text-dim); font-size:13px;">Estimated TDEE</span>
+        <span class="mono" style="color:var(--text);">${Math.round(tdee)} kcal</span>
+      </div>
+      <div style="display:flex; justify-content:space-between;">
+        <span style="color:var(--text-dim); font-size:13px;">Suggested Target</span>
+        <span class="mono" style="color:var(--cyan); font-weight:700;">${target} kcal/day</span>
+      </div>
+      <div class="small-note">Estimates are not perfect measurements — actual needs vary between individuals.</div>
+      ${unsafe ? `<div class="warn-banner" style="margin-top:10px;">This calorie target looks unusually low relative to your estimated needs. Consider professional guidance before pursuing an aggressive deficit.</div>`:''}
+    </div>
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="corner-tag">Macros / Day</div>
+      <div style="display:flex; justify-content:space-around; text-align:center; padding-top:4px;">
+        <div><div class="mono" style="font-size:17px; color:var(--cyan);">${macros.proteinG}g</div><div style="font-size:11px;color:var(--text-faint);">PROTEIN</div></div>
+        <div><div class="mono" style="font-size:17px; color:var(--cyan);">${macros.carbG}g</div><div style="font-size:11px;color:var(--text-faint);">CARBS</div></div>
+        <div><div class="mono" style="font-size:17px; color:var(--cyan);">${macros.fatG}g</div><div style="font-size:11px;color:var(--text-faint);">FAT</div></div>
+      </div>
+    </div>
+    <button class="btn btn-solid btn-block" id="finish-onboarding">Enter The System</button>
+  `, 5, 5);
+}
+
+function attachSingleSelect(containerId, cb, allowMulti){
+  const cont = document.getElementById(containerId);
+  if(!cont) return;
+  cont.addEventListener('click', (e)=>{
+    const c = e.target.closest('.choice');
+    if(!c) return;
+    if(allowMulti){
+      c.classList.toggle('sel');
+    } else {
+      [...cont.children].forEach(ch=>ch.classList.remove('sel'));
+      c.classList.add('sel');
+    }
+    cb && cb();
+  });
+}
+
+function bindOnboardingStep(){
+  if(OB.step===1){
+    ['q-cond','q-symptom','q-injury','q-preg'].forEach(id=>attachSingleSelect(id, updateMedicalWarning));
+    document.getElementById('med-continue').onclick = ()=>{
+      const cond = getSel('q-cond'), symptom=getSel('q-symptom'), injury=getSel('q-injury'), preg=getSel('q-preg');
+      OB.data.medicalFlag = (cond==='yes'||symptom==='yes'||preg==='yes');
+      OB.data.hasInjuryFlag = injury==='yes';
+      OB.step=2; renderOnboarding();
+    };
+  }
+  if(OB.step===2){
+    attachSingleSelect('q-sex');
+    document.getElementById('info-continue').onclick = ()=>{
+      const name = document.getElementById('in-name').value.trim();
+      const sex = getSel('q-sex');
+      const age = parseInt(document.getElementById('in-age').value);
+      const height = parseFloat(document.getElementById('in-height').value);
+      const weight = parseFloat(document.getElementById('in-weight').value);
+      const err = document.getElementById('info-error');
+      if(!name || !sex || !age || !height || !weight || age<13 || age>90 || height<120 || height>230 || weight<30 || weight>250){
+        err.textContent = 'Please fill every field with a realistic value (age 13–90, height 120–230cm, weight 30–250kg).';
+        err.classList.remove('hidden');
+        return;
+      }
+      err.classList.add('hidden');
+      OB.data.name=name; OB.data.sex=sex; OB.data.age=age; OB.data.heightCm=height; OB.data.weightKg=weight;
+      OB.step=3; renderOnboarding();
+    };
+  }
+  if(OB.step===3){
+    attachSingleSelect('q-goal'); attachSingleSelect('q-fitlevel'); attachSingleSelect('q-activity');
+    document.getElementById('goal-continue').onclick = ()=>{
+      const goal=getSel('q-goal'), fit=getSel('q-fitlevel'), act=getSel('q-activity');
+      if(!goal||!fit||!act){ return alert('Please select all options.'); }
+      OB.data.goal=goal; OB.data.fitnessLevel=fit; OB.data.activityLevel=act;
+      OB.step=4; renderOnboarding();
+    };
+  }
+  if(OB.step===4){
+    attachSingleSelect('q-equip', null, true);
+    attachSingleSelect('q-time');
+    attachSingleSelect('q-days');
+    document.getElementById('equip-continue').onclick = ()=>{
+      const equipEls = [...document.querySelectorAll('#q-equip .choice.sel')].map(e=>e.dataset.v);
+      const time = getSel('q-time'); const days = getSel('q-days');
+      if(equipEls.length===0 || !time || !days){ return alert('Please select equipment, time, and training days.'); }
+      OB.data.equipment = equipEls.includes('None') ? equipEls : equipEls;
+      OB.data.timeMin = parseInt(time); OB.data.daysPerWeek = parseInt(days);
+      OB.step=5; renderOnboarding();
+    };
+  }
+  if(OB.step===5){
+    document.getElementById('finish-onboarding').onclick = ()=>{
+      finalizeOnboarding();
+    };
+  }
+}
+function getSel(id){
+  const el = document.querySelector('#'+id+' .choice.sel');
+  return el ? el.dataset.v : null;
+}
+function updateMedicalWarning(){
+  const cond = getSel('q-cond'), symptom=getSel('q-symptom'), preg=getSel('q-preg');
+  const box = document.getElementById('medical-warning');
+  if(cond==='yes'||symptom==='yes'||preg==='yes') box.classList.remove('hidden');
+  else box.classList.add('hidden');
+}
+
+function finalizeOnboarding(){
+  state = defaultState();
+  state.onboarded = true;
+  state.profile = {
+    name: OB.data.name, sex: OB.data.sex, age: OB.data.age, heightCm: OB.data.heightCm, weightKg: OB.data.weightKg,
+    goal: OB.data.goal, fitnessLevel: OB.data.fitnessLevel, activityLevel: OB.data.activityLevel,
+    equipment: OB.data.equipment, timeMin: OB.data.timeMin, daysPerWeek: OB.data.daysPerWeek,
+    medicalFlag: !!OB.data.medicalFlag, hasInjuryFlag: !!OB.data.hasInjuryFlag
+  };
+  state.weightLog.push({date: todayStr(), weightKg: OB.data.weightKg});
+  state.todayQuest = generateDailyQuest();
+  state.todayQuest.progress = state.todayQuest.exercises.map(()=>0);
+  state.todayQuest.dateGenerated = todayStr();
+  save();
+  renderApp();
+}
+
+/* ---------- Helpers ---------- */
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtTime(sec){
+  const m = Math.floor(sec/60), s=sec%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function toast(msg){
+  const t = document.createElement('div');
+  t.className='toast'; t.textContent=msg;
+  document.getElementById('overlay-root').appendChild(t);
+  setTimeout(()=>t.remove(), 2200);
+}
+function haveXpNeeded(){ return xpForLevel(state.level); }
+
+/* ---------- XP / Level handling ---------- */
+function grantXP(amount, reason){
+  const before = state.level;
+  state.xp += amount;
+  let leveled=false;
+  while(state.xp >= xpForLevel(state.level)){
+    state.xp -= xpForLevel(state.level);
+    state.level += 1;
+    leveled = true;
+    bumpStatsOnLevel();
+  }
+  save();
+  if(leveled){ showLevelUp(before, state.level); }
+  else { toast(`+${amount} XP${reason? ' — '+reason:''}`); }
+  updateRank();
+}
+function bumpStatsOnLevel(){
+  state.stats.strength = Math.min(100, state.stats.strength + Math.round(1+Math.random()*2));
+  state.stats.endurance = Math.min(100, state.stats.endurance + Math.round(1+Math.random()*2));
+  state.stats.discipline = Math.min(100, state.stats.discipline + 1);
+  state.stats.vitality = Math.min(100, state.stats.vitality + 1);
+  state.stats.agility = Math.min(100, state.stats.agility + Math.round(Math.random()*2));
+}
+function updateRank(){
+  const avg = (state.stats.strength+state.stats.endurance+state.stats.discipline+state.stats.vitality+state.stats.agility)/5;
+  const consistency = Math.min(100, state.streak*4);
+  const score = avg*0.6 + consistency*0.4;
+  let rank='E';
+  if(score>90) rank='SSS';
+  else if(score>78) rank='SS';
+  else if(score>65) rank='S';
+  else if(score>50) rank='A';
+  else if(score>36) rank='B';
+  else if(score>24) rank='C';
+  else if(score>12) rank='D';
+  if(rank!==state.rank && ['D','C','B','A','S','SS','SSS'].indexOf(rank) > ['D','C','B','A','S','SS','SSS'].indexOf(state.rank)){
+    if(rank==='D') unlockAchievement('rankd');
+  }
+  state.rank = rank;
+  save();
+}
+function unlockAchievement(id){
+  if(!state.achievements.includes(id)){
+    state.achievements.push(id);
+    save();
+    const a = ACHIEVEMENTS.find(x=>x.id===id);
+    if(a) toast(`🏆 Achievement Unlocked: ${a.name}`);
+  }
+}
+
+function showLevelUp(fromLvl, toLvl){
+  const el = document.createElement('div');
+  el.className='levelup-overlay';
+  el.innerHTML = `
+    <div class="sys">SYSTEM</div>
+    <div class="lu">LEVEL UP</div>
+    <div class="transition">LEVEL <b>${fromLvl}</b> → <b>${toLvl}</b></div>
+    <div class="gains">
+      <div>+ STRENGTH</div>
+      <div>+ ENDURANCE</div>
+      <div>+ DISCIPLINE</div>
+    </div>
+    <button class="btn btn-solid" id="lu-close" style="padding:12px 34px;">New Quests Available</button>
+  `;
+  document.getElementById('overlay-root').appendChild(el);
+  document.getElementById('lu-close').onclick = ()=>{ el.remove(); renderApp(); };
+}
+
+/* ---------- Quest lifecycle ---------- */
+function ensureTodayQuest(){
+  if(!state.todayQuest || state.todayQuest.dateGenerated !== todayStr()){
+    // handle missed quest from yesterday
+    if(state.todayQuest && state.todayQuest.dateGenerated !== todayStr() && state.todayQuest.status!=='complete'){
+      handleMissedQuest();
+    }
+    if(state.todayQuest && !state.todayQuest.rest){
+      const grp = inferPrimaryGroup(state.todayQuest);
+      state.lastMuscleGroups.push(grp);
+      if(state.lastMuscleGroups.length>5) state.lastMuscleGroups.shift();
+    }
+    state.dayCount += 1;
+    state.todayQuest = generateDailyQuest();
+    state.todayQuest.progress = state.todayQuest.exercises.map(()=>0);
+    state.todayQuest.dateGenerated = todayStr();
+    state.todayQuest.status='active';
+    save();
+  }
+}
+function inferPrimaryGroup(quest){
+  if(!quest.exercises.length) return null;
+  const key = quest.exercises[0].key;
+  return EXO[key] ? EXO[key].group : null;
+}
+function handleMissedQuest(){
+  state.xp = Math.max(0, state.xp - 50);
+  state.streak = 0;
+  state.missedStreakForNotice += 1;
+  save();
+}
+
+function completeQuest(){
+  const q = state.todayQuest;
+  q.status='complete';
+  state.streak += 1;
+  state.questHistoryDates.push(todayStr());
+  state.missedStreakForNotice = 0;
+
+  let totalCalories=0, totalMinutes=q.estMinutes;
+  q.exercises.forEach(ex=>{
+    const mins = ex.unit==='min' ? ex.durationMin : ex.unit==='sec' ? (ex.sets*ex.durationSec)/60 : (ex.sets*ex.reps*0.05);
+    totalCalories += estimateCaloriesForExercise(ex.key, state.profile.weightKg, mins);
+  });
+
+  const logEntry = {
+    date: todayStr(),
+    exercises: q.exercises.map(ex=>({key:ex.key, sets:ex.sets, reps:ex.reps, durationSec:ex.durationSec, durationMin:ex.durationMin})),
+    durationMin: totalMinutes,
+    caloriesLow: Math.round(totalCalories*0.85),
+    caloriesHigh: Math.round(totalCalories*1.15),
+    xp: q.estXP,
+    status:'complete',
+    rest:q.rest
+  };
+  state.workoutLog.unshift(logEntry);
+
+  checkPRs(q);
+
+  if(state.workoutLog.length===1) unlockAchievement('first_workout');
+  if(state.questHistoryDates.length===1) unlockAchievement('first_quest');
+  if(state.streak>=7) unlockAchievement('streak7');
+  if(state.streak>=30) unlockAchievement('streak30');
+  if(state.workoutLog.length>=100) unlockAchievement('workouts100');
+  const hr = new Date().getHours();
+  if(hr<8) unlockAchievement('early');
+  const weekAgo = Date.now()-7*86400000;
+  const thisWeekCount = state.questHistoryDates.filter(d=>new Date(d).getTime()>=weekAgo).length;
+  if(thisWeekCount>=5) unlockAchievement('consistency');
+  const totalHrs = state.workoutLog.reduce((s,w)=>s+(w.durationMin||0),0)/60;
+  if(totalHrs>=10) unlockAchievement('hours10');
+
+  save();
+  grantXP(q.estXP, 'Quest Complete');
+}
+
+function checkPRs(q){
+  let newPR=false;
+  q.exercises.forEach(ex=>{
+    if(ex.unit==='reps'){
+      const key = ex.key;
+      const val = ex.reps;
+      if(!state.prs[key] || val > state.prs[key].value){
+        state.prs[key] = {value:val, label:`${val} reps`, date:todayStr()};
+        newPR=true;
+      }
+    }
+  });
+  if(newPR){
+    if(Object.keys(state.prs).length>=1 && !state.achievements.includes('first_pr')) unlockAchievement('first_pr');
+  }
+}
+
+/* ---------- Screens ---------- */
+let currentScreen = 'home';
+function setScreen(s){ currentScreen = s; renderScreen(); }
+
+function renderApp(){
+  document.getElementById('onboarding').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  ensureTodayQuest();
+  document.getElementById('topbar-rank').textContent = 'RANK '+state.rank;
+  renderNav();
+  renderScreen();
+}
+
+function renderNav(){
+  const items = [
+    {id:'home', label:'Home', icon:iconHome},
+    {id:'quest', label:'Quest', icon:iconQuest},
+    {id:'progress', label:'Progress', icon:iconProgress},
+    {id:'nutrition', label:'Nutrition', icon:iconNutrition},
+    {id:'profile', label:'Profile', icon:iconProfile},
+  ];
+  const nav = document.getElementById('bottom-nav');
+  nav.innerHTML = items.map(it=>`
+    <div class="nav-item ${currentScreen===it.id?'active':''}" data-nav="${it.id}">
+      ${it.icon}
+      <div class="lbl">${it.label}</div>
+    </div>`).join('');
+  nav.querySelectorAll('.nav-item').forEach(el=>{
+    el.onclick = ()=> setScreen(el.dataset.nav);
+  });
+}
+
+const iconHome = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>`;
+const iconQuest = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>`;
+const iconProgress = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 20h18"/><path d="M6 20V10M12 20V4M18 20v14"/></svg>`;
+const iconNutrition = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v6M8 2v3M16 2v3"/><path d="M6 8h12l-1 12H7z"/></svg>`;
+const iconProfile = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>`;
+
+function renderScreen(){
+  const root = document.getElementById('screen-root');
+  if(currentScreen==='home') root.innerHTML = homeHTML();
+  if(currentScreen==='quest') root.innerHTML = questScreenHTML();
+  if(currentScreen==='progress') root.innerHTML = progressHTML();
+  if(currentScreen==='nutrition') root.innerHTML = nutritionHTML();
+  if(currentScreen==='profile') root.innerHTML = profileHTML();
+  bindScreenEvents();
+}
+
+function xpPct(){ return Math.min(100, Math.round((state.xp / xpForLevel(state.level))*100)); }
+
+function homeHTML(){
+  const p = state.profile;
+  const q = state.todayQuest;
+  return `
+  <div class="screen">
+    <div class="level-hero">
+      <div class="level-badge"><div class="n">${state.level}</div><div class="l">LVL</div></div>
+      <div>
+        <div class="hero-name">${p.name}</div>
+        <div class="hero-sub">STREAK ${state.streak} · RANK ${state.rank}</div>
+      </div>
+    </div>
+    <div class="bar-track"><div class="bar-fill" style="width:${xpPct()}%"></div></div>
+    <div style="display:flex; justify-content:space-between; margin-top:6px; font-family:var(--font-mono); font-size:11px; color:var(--text-faint);">
+      <span>${state.xp} / ${xpForLevel(state.level)} XP</span>
+      <span>${xpPct()}%</span>
+    </div>
+
+    <div class="section-title"><h2>Today's Quest</h2><span class="pill">${q.difficulty} RANK</span></div>
+    ${questPreviewCard(q)}
+
+    <div class="section-title"><h2>Player Stats</h2></div>
+    ${statGridHTML()}
+
+    <div class="section-title"><h2>Daily Status</h2></div>
+    <div class="panel">
+      ${dailyStatusRows()}
+    </div>
+  </div>`;
+}
+
+function questPreviewCard(q){
+  const isDone = q.status==='complete';
+  return `
+  <div class="panel quest-card panel-glow">
+    <div class="quest-header">
+      <div>
+        <div style="font-family:var(--font-head); font-weight:700; font-size:16px;">${q.title}</div>
+        <div style="font-size:11.5px; color:var(--text-faint); margin-top:2px;">PLAYER: ${state.profile.name.toUpperCase()} · LEVEL ${state.level}</div>
+      </div>
+      <div class="diff">${q.difficulty}</div>
+    </div>
+    <div class="divider"></div>
+    ${q.exercises.map(ex=>exerciseSummaryRow(ex)).join('')}
+    <div class="divider"></div>
+    <div style="display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:13px; color:var(--text-dim);">
+      <span>QUEST TIME: ${q.estMinutes} MIN</span>
+      <span style="color:var(--cyan);">EST XP +${q.estXP}</span>
+    </div>
+    <button class="btn ${isDone?'btn-ghost':'btn-solid'} btn-block" style="margin-top:14px;" id="go-quest" ${isDone?'disabled':''}>
+      ${isDone? 'Quest Complete ✓' : (q.rest? 'Start Recovery' : 'Start Quest')}
+    </button>
+  </div>`;
+}
+function exerciseSummaryRow(ex){
+  const e = EXO[ex.key];
+  let valStr;
+  if(ex.unit==='reps') valStr = `${ex.sets} × ${ex.reps}`;
+  else if(ex.unit==='sec') valStr = `${ex.sets} × ${ex.durationSec}s`;
+  else valStr = `${ex.durationMin} MIN`;
+  return `<div class="exercise-row"><div class="name">${e.name.toUpperCase()}</div><div class="val">${valStr}</div></div>`;
+}
+
+function statGridHTML(){
+  const s = state.stats;
+  return `<div class="stat-grid">
+    ${statTile('STR', s.strength)}${statTile('END', s.endurance)}${statTile('AGI', s.agility)}
+    ${statTile('VIT', s.vitality)}${statTile('DIS', s.discipline)}${statTile('PWR', Math.round((s.strength+s.endurance+s.agility)/3))}
+  </div>`;
+}
+function statTile(label,val){
+  return `<div class="stat-tile"><div class="v">${val}</div><div class="k">${label}</div></div>`;
+}
+function dailyStatusRows(){
+  const p = state.profile;
+  const target = calcCalorieTarget(p);
+  const last = state.workoutLog[0];
+  const cals = last && last.date===todayStr() ? `${last.caloriesLow}–${last.caloriesHigh} kcal (est.)` : '— not logged yet';
+  return `
+    <div class="exercise-row"><div class="name">Calorie Target</div><div class="val">${target} kcal</div></div>
+    <div class="exercise-row"><div class="name">Today's Burn</div><div class="val">${cals}</div></div>
+    <div class="exercise-row"><div class="name">Recovery Status</div><div class="val ${recentFatigueHigh()?'':'done'}">${recentFatigueHigh()?'ELEVATED':'NORMAL'}</div></div>
+  `;
+}
+
+function questScreenHTML(){
+  const q = state.todayQuest;
+  const isDone = q.status==='complete';
+  return `
+  <div class="screen">
+    <div class="eyebrow">${q.rest? 'Recovery Quest':'Main Character Training Arc'}</div>
+    <h2 style="font-size:20px; margin-bottom:14px;">${q.title}</h2>
+    ${q.rest? recoveryQuestHTML(q) : trainingQuestHTML(q)}
+  </div>`;
+}
+function recoveryQuestHTML(q){
+  return `
+    <div class="panel panel-glow" style="margin-bottom:16px;">
+      <p style="font-size:13.5px; color:var(--text-dim); line-height:1.6; margin:0 0 12px;">Today is a scheduled recovery day. Training too hard without rest slows real progress — the System has adjusted your quest accordingly.</p>
+      <div class="exercise-row"><div class="name">Easy Walk</div><div class="val">20 MIN</div></div>
+      ${q.extras.map(x=>`<div class="exercise-row"><div class="name" style="font-size:13px; font-weight:500;">${x}</div><div class="val">—</div></div>`).join('')}
+    </div>
+    <button class="btn btn-solid btn-block" id="complete-rest" ${q.status==='complete'?'disabled':''}>${q.status==='complete'?'Recovery Logged ✓':'Log Recovery Complete'}</button>
+  `;
+}
+function trainingQuestHTML(q){
+  return `
+    <div class="panel panel-glow" style="margin-bottom:16px;">
+      <div class="quest-header">
+        <div class="pill">${q.difficulty} RANK</div>
+        <div class="mono" style="color:var(--text-dim); font-size:12px;">~${q.estMinutes} MIN · +${q.estXP} XP</div>
+      </div>
+      ${q.exercises.map((ex,i)=>exerciseCheckRow(ex,i)).join('')}
+    </div>
+    <button class="btn btn-solid btn-block" id="start-timer">Start Guided Timer</button>
+    <button class="btn btn-ghost btn-block" style="margin-top:10px;" id="manual-complete" ${q.status==='complete'?'disabled':''}>${q.status==='complete'?'Quest Complete ✓':'Mark All Complete Manually'}</button>
+  `;
+}
+function exerciseCheckRow(ex,i){
+  const e = EXO[ex.key];
+  let valStr;
+  if(ex.unit==='reps') valStr = `${ex.sets} × ${ex.reps} reps`;
+  else if(ex.unit==='sec') valStr = `${ex.sets} × ${ex.durationSec}s`;
+  else valStr = `${ex.durationMin} min`;
+  const done = state.todayQuest.progress[i]===1;
+  return `
+  <div class="exercise-row" data-exidx="${i}">
+    <div class="exercise-flex">
+      <div class="check ${done?'on':''}" data-exercisecheck="${i}">${done?'✓':''}</div>
+      <div>
+        <div class="name">${e.name}</div>
+        <div class="meta">${e.primary} · ${e.equip}</div>
+      </div>
+    </div>
+    <div class="val ${done?'done':''}">${valStr}</div>
+  </div>`;
+}
+
+function progressHTML(){
+  const wl = state.weightLog;
+  const trend = wl.length>=2 ? `${wl[Math.max(0,wl.length-7)].weightKg} kg → ${wl[wl.length-1].weightKg} kg` : `${wl[0]?.weightKg||'--'} kg`;
+  return `
+  <div class="screen">
+    <h2 style="font-size:20px; margin-bottom:14px;">Progress</h2>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="corner-tag">Weight Trend</div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="mono" style="font-size:17px;">${trend}</div>
+        <button class="btn btn-sm btn-ghost" id="log-weight">Log Weight</button>
+      </div>
+      <div class="small-note">Short-term daily changes often reflect water and other factors, not fat gain or loss — use the trend, not single readings.</div>
+    </div>
+
+    <div class="section-title"><h2>Personal Records</h2></div>
+    <div class="panel" style="margin-bottom:16px;">
+      ${Object.keys(state.prs).length===0 ? `<div class="small-note">No PRs yet — complete quests to start setting records.</div>` :
+        Object.entries(state.prs).map(([k,v])=>`<div class="exercise-row"><div class="name">${EXO[k]?EXO[k].name:k}</div><div class="val">${v.label}</div></div>`).join('')}
+    </div>
+
+    <div class="section-title"><h2>Rank</h2></div>
+    <div class="panel panel-glow" style="text-align:center; margin-bottom:16px;">
+      ${rankHexSVG(state.rank)}
+      <div style="display:flex; justify-content:space-around; margin-top:12px; text-align:left; padding:0 10px;">
+        <div><div class="mono" style="color:var(--cyan);">${state.stats.strength}</div><div style="font-size:10.5px;color:var(--text-faint);">STRENGTH</div></div>
+        <div><div class="mono" style="color:var(--cyan);">${state.stats.endurance}</div><div style="font-size:10.5px;color:var(--text-faint);">ENDURANCE</div></div>
+        <div><div class="mono" style="color:var(--cyan);">${Math.min(100,state.streak*4)}</div><div style="font-size:10.5px;color:var(--text-faint);">CONSISTENCY</div></div>
+      </div>
+    </div>
+
+    <div class="section-title"><h2>Achievements</h2><span class="pill">${state.achievements.length}/${ACHIEVEMENTS.length}</span></div>
+    <div class="ach-grid" style="margin-bottom:16px;">
+      ${ACHIEVEMENTS.map(a=>{
+        const unlocked = state.achievements.includes(a.id);
+        return `<div class="ach-item ${unlocked?'unlocked':''}">
+          <div class="ach-hex ${unlocked?'unlocked':''}">${unlocked?a.icon:'?'}</div>
+          <div class="t">${unlocked?a.name:'Locked'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="section-title"><h2>Workout Log</h2></div>
+    ${state.workoutLog.length===0 ? `<p class="small-note">No workouts logged yet.</p>` :
+      state.workoutLog.slice(0,10).map(w=>`
+      <div class="log-item">
+        <div class="top"><span>${w.rest?'Recovery Day':'Training Quest'}</span><span class="xp">+${w.xp} XP</span></div>
+        <div class="date">${w.date} · ${w.durationMin} min${w.rest?'':` · ${w.caloriesLow}–${w.caloriesHigh} kcal est.`}</div>
+      </div>`).join('')}
+  </div>`;
+}
+
+function rankHexSVG(rank){
+  const colorMap = {E:'#5c7285',D:'#3fe3ff',C:'#3fe3ff',B:'#8a63ff',A:'#8a63ff',S:'#ffb020',SS:'#ff8a3d',SSS:'#ff4d5e'};
+  const c = colorMap[rank] || '#3fe3ff';
+  return `
+  <svg width="130" height="130" viewBox="0 0 130 130" style="margin:0 auto;">
+    <polygon points="65,6 119,35 119,95 65,124 11,95 11,35" fill="rgba(63,227,255,0.05)" stroke="${c}" stroke-width="2.5" style="filter:drop-shadow(0 0 8px ${c}88)"/>
+    <text x="65" y="78" text-anchor="middle" font-family="Orbitron" font-size="34" fill="${c}">${rank}</text>
+  </svg>`;
+}
+
+function nutritionHTML(){
+  const p = state.profile;
+  const bmr = calcBMR(p), tdee = calcTDEE(p), target = calcCalorieTarget(p);
+  const macros = calcMacros(p, target);
+  const unsafe = unsafeCalorieCheck(p, target);
+  return `
+  <div class="screen">
+    <h2 style="font-size:20px; margin-bottom:14px;">Nutrition Plan</h2>
+    <div class="panel panel-glow" style="margin-bottom:14px;">
+      <div class="corner-tag">Your Calorie Goal</div>
+      <div style="text-align:center; padding:10px 0;">
+        <div class="mono" style="font-size:32px; color:var(--cyan); font-weight:700;">${target}</div>
+        <div style="font-size:12px; color:var(--text-dim);">kcal per day (estimate)</div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-dim);">
+        <span>BMR</span><span class="mono">${Math.round(bmr)} kcal</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-dim); margin-top:6px;">
+        <span>Estimated TDEE</span><span class="mono">${Math.round(tdee)} kcal</span>
+      </div>
+      <div class="small-note">Calorie estimates are not perfect measurements. Actual energy needs vary between individuals.</div>
+      ${unsafe?`<div class="warn-banner" style="margin-top:10px;">This target is unusually low. Consider consulting a professional before pursuing an aggressive deficit.</div>`:''}
+    </div>
+    <div class="panel" style="margin-bottom:14px;">
+      <div class="corner-tag">Macros / Day</div>
+      <div style="display:flex; justify-content:space-around; text-align:center; padding-top:6px;">
+        <div><div class="mono" style="font-size:19px; color:var(--cyan);">${macros.proteinG}g</div><div style="font-size:11px;color:var(--text-faint);">PROTEIN</div></div>
+        <div><div class="mono" style="font-size:19px; color:var(--cyan);">${macros.carbG}g</div><div style="font-size:11px;color:var(--text-faint);">CARBS</div></div>
+        <div><div class="mono" style="font-size:19px; color:var(--cyan);">${macros.fatG}g</div><div style="font-size:11px;color:var(--text-faint);">FAT</div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="corner-tag">Fat Loss Principle</div>
+      <p style="font-size:13px; color:var(--text-dim); line-height:1.6; margin:8px 0 0;">Fat loss primarily depends on sustained energy balance over time. Exercise increases energy expenditure and helps preserve or build muscle, but no single exercise targets fat in one area.</p>
+    </div>
+  </div>`;
+}
+
+function profileHTML(){
+  const p = state.profile;
+  const s = state.settings;
+  return `
+  <div class="screen">
+    <h2 style="font-size:20px; margin-bottom:14px;">Profile</h2>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="exercise-row"><div class="name">Name</div><div class="val">${p.name}</div></div>
+      <div class="exercise-row"><div class="name">Age / Sex</div><div class="val">${p.age} · ${p.sex}</div></div>
+      <div class="exercise-row"><div class="name">Height / Weight</div><div class="val">${p.heightCm}cm · ${p.weightKg}kg</div></div>
+      <div class="exercise-row"><div class="name">Goal</div><div class="val">${p.goal}</div></div>
+      <div class="exercise-row"><div class="name">Fitness Level</div><div class="val">${p.fitnessLevel}</div></div>
+      <div class="exercise-row"><div class="name">Days / Week</div><div class="val">${p.daysPerWeek}</div></div>
+    </div>
+
+    <div class="section-title"><h2>System Coach</h2></div>
+    <div class="panel" style="margin-bottom:16px;">
+      <p class="small-note" style="margin-bottom:10px;">Ask the System Coach about today's quest, progression, or substitutions.</p>
+      <div class="chip-row" style="margin-bottom:10px;">
+        <div class="chip" data-ask="today">What should I do today?</div>
+        <div class="chip" data-ask="why">Why this workout?</div>
+        <div class="chip" data-ask="sub">Can I replace an exercise?</div>
+        <div class="chip" data-ask="missed">I missed yesterday</div>
+      </div>
+      <div id="coach-answer" class="small-note" style="color:var(--text-dim); min-height:20px;"></div>
+    </div>
+
+    <div class="section-title"><h2>Settings</h2></div>
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="settings-row">
+        <div><div class="t">Sound</div></div>
+        <div class="toggle ${s.sound?'on':''}" data-setting="sound"><div class="knob"></div></div>
+      </div>
+      <div class="settings-row">
+        <div><div class="t">Animations</div></div>
+        <div class="toggle ${s.animations?'on':''}" data-setting="animations"><div class="knob"></div></div>
+      </div>
+      <div class="settings-row">
+        <div><div class="t">Notifications</div></div>
+        <div class="toggle ${s.notifications?'on':''}" data-setting="notifications"><div class="knob"></div></div>
+      </div>
+      <div class="settings-row">
+        <div><div class="t">Reduced Motion</div></div>
+        <div class="toggle ${s.reduceMotion?'on':''}" data-setting="reduceMotion"><div class="knob"></div></div>
+      </div>
+    </div>
+
+    <button class="btn btn-ghost btn-block" id="export-data" style="margin-bottom:10px;">Export Workout Data (JSON)</button>
+    <button class="btn btn-ghost btn-block" id="reset-data" style="color:var(--danger); border-color:rgba(255,77,94,0.4);">Delete Account / Reset Data</button>
+  </div>`;
+}
+
+/* ---------- Event binding ---------- */
+function bindScreenEvents(){
+  const goQuest = document.getElementById('go-quest');
+  if(goQuest) goQuest.onclick = ()=> setScreen('quest');
+
+  const completeRest = document.getElementById('complete-rest');
+  if(completeRest) completeRest.onclick = ()=>{ completeQuest(); renderApp(); setScreen('home'); };
+
+  document.querySelectorAll('[data-exercisecheck]').forEach(el=>{
+    el.onclick = ()=>{
+      const i = parseInt(el.dataset.exercisecheck);
+      state.todayQuest.progress[i] = state.todayQuest.progress[i]?0:1;
+      save();
+      renderScreen();
+    };
+  });
+
+  const startTimer = document.getElementById('start-timer');
+  if(startTimer) startTimer.onclick = ()=> launchTimer();
+
+  const manualComplete = document.getElementById('manual-complete');
+  if(manualComplete) manualComplete.onclick = ()=>{
+    askRPEThenComplete();
+  };
+
+  const logWeight = document.getElementById('log-weight');
+  if(logWeight) logWeight.onclick = ()=> openLogWeightModal();
+
+  document.querySelectorAll('[data-setting]').forEach(el=>{
+    el.onclick = ()=>{
+      const key = el.dataset.setting;
+      state.settings[key] = !state.settings[key];
+      save();
+      renderScreen();
+    };
+  });
+
+  const exportBtn = document.getElementById('export-data');
+  if(exportBtn) exportBtn.onclick = ()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='arise_data.json'; a.click();
+  };
+  const resetBtn = document.getElementById('reset-data');
+  if(resetBtn) resetBtn.onclick = ()=>{
+    if(confirm('This will permanently delete all your System data. Continue?')){
+      localStorage.removeItem(LS_KEY);
+      location.reload();
+    }
+  };
+
+  document.querySelectorAll('[data-ask]').forEach(el=>{
+    el.onclick = ()=>{
+      document.querySelectorAll('[data-ask]').forEach(c=>c.classList.remove('sel'));
+      el.classList.add('sel');
+      document.getElementById('coach-answer').textContent = coachAnswer(el.dataset.ask);
+    };
+  });
+}
+
+function coachAnswer(type){
+  const q = state.todayQuest;
+  if(type==='today') return q.rest ? "Today is a recovery day — an easy walk and some mobility work. Your body adapts during rest, not just during training." : `Today's quest is ${q.difficulty} rank: ${q.exercises.map(e=>EXO[e.key].name).join(', ')}, about ${q.estMinutes} minutes total.`;
+  if(type==='why') return "The System builds today's quest from your goal, recent training, recovery status, and equipment — rotating muscle groups so you're not hitting the same area two days straight.";
+  if(type==='sub') return "Yes — open an exercise's info to see beginner and advanced alternatives that train the same movement pattern.";
+  if(type==='missed') return "No shame — a missed quest resets your streak and costs some XP, but your plan adapts. Consistency over time matters far more than any single day.";
+  return '';
+}
+
+/* ---------- RPE / Fatigue prompt ---------- */
+function askRPEThenComplete(){
+  const el = document.createElement('div');
+  el.className='modal-backdrop';
+  el.innerHTML = `
+  <div class="modal-sheet">
+    <h3 style="font-size:17px; margin-bottom:4px;">How difficult was this quest?</h3>
+    <p class="small-note" style="margin-bottom:12px;">Rate 1 (easy) – 10 (max effort)</p>
+    <div class="choice-grid" id="rpe-grid" style="grid-template-columns:repeat(5,1fr); margin-bottom:16px;">
+      ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="choice" data-v="${n}" style="padding:10px 0;">${n}</div>`).join('')}
+    </div>
+    <p class="small-note" style="margin-bottom:8px;">Current fatigue level</p>
+    <div class="choice-grid" id="fatigue-grid" style="margin-bottom:18px;">
+      <div class="choice" data-v="Low">Low</div>
+      <div class="choice" data-v="Moderate">Moderate</div>
+      <div class="choice" data-v="High">High</div>
+    </div>
+    <button class="btn btn-solid btn-block" id="submit-rpe">Submit & Complete Quest</button>
+  </div>`;
+  document.getElementById('overlay-root').appendChild(el);
+  attachSingleSelect('rpe-grid');
+  attachSingleSelect('fatigue-grid');
+  document.getElementById('submit-rpe').onclick = ()=>{
+    const fatigue = getSel('fatigue-grid') || 'Moderate';
+    state.fatigueReports.push(fatigue);
+    if(state.fatigueReports.length>10) state.fatigueReports.shift();
+    save();
+    el.remove();
+    completeQuest();
+    renderApp();
+    setScreen('home');
+  };
+}
+
+/* ---------- Weight log modal ---------- */
+function openLogWeightModal(){
+  const el = document.createElement('div');
+  el.className='modal-backdrop';
+  el.innerHTML = `
+  <div class="modal-sheet">
+    <h3 style="font-size:17px; margin-bottom:12px;">Log Weight</h3>
+    <div class="field">
+      <label class="field-label">Weight (kg)</label>
+      <input type="number" id="weight-input" step="0.1" value="${state.profile.weightKg}">
+    </div>
+    <button class="btn btn-solid btn-block" id="save-weight">Save</button>
+  </div>`;
+  document.getElementById('overlay-root').appendChild(el);
+  document.getElementById('save-weight').onclick = ()=>{
+    const v = parseFloat(document.getElementById('weight-input').value);
+    if(!v || v<30 || v>250){ alert('Please enter a realistic weight (30–250kg).'); return; }
+    state.weightLog.push({date:todayStr(), weightKg:v});
+    state.profile.weightKg = v;
+    save();
+    el.remove();
+    renderScreen();
+  };
+}
+
+/* ---------- Guided Timer ---------- */
+let timerState = null;
+function buildTimerQueue(q){
+  const queue=[];
+  q.exercises.forEach((ex,exIdx)=>{
+    const sets = ex.sets||1;
+    for(let s=0;s<sets;s++){
+      let dur;
+      if(ex.unit==='sec') dur = ex.durationSec;
+      else if(ex.unit==='min') dur = ex.durationMin*60;
+      else dur = null; // rep-based: manual "go" step, use a nominal 40s work estimate for progress bar
+      queue.push({exIdx, setIdx:s, totalSets:sets, kind: ex.unit==='reps' ? 'reps':'timed', dur: dur || 40, ex});
+      if(s<sets-1) queue.push({rest:true, exIdx, dur:35});
+    }
+  });
+  return queue;
+}
+function launchTimer(){
+  const q = state.todayQuest;
+  const queue = buildTimerQueue(q);
+  timerState = {queue, idx:0, remaining:queue[0].dur, running:true, interval:null};
+  renderTimerScreen();
+  tickTimer();
+}
+function tickTimer(){
+  clearInterval(timerState.interval);
+  timerState.interval = setInterval(()=>{
+    if(!timerState.running) return;
+    timerState.remaining -= 1;
+    if(timerState.remaining<=0){
+      advanceTimerStep();
+    }
+    updateTimerDisplay();
+  }, 1000);
+}
+function advanceTimerStep(){
+  const step = timerState.queue[timerState.idx];
+  if(!step.rest){
+    const ex = step.ex;
+    const exIdx = step.exIdx;
+    // mark progress for reps-based when all sets of that exercise done
+  }
+  timerState.idx += 1;
+  if(timerState.idx >= timerState.queue.length){
+    clearInterval(timerState.interval);
+    finishTimer();
+    return;
+  }
+  timerState.remaining = timerState.queue[timerState.idx].dur;
+  renderTimerScreen();
+}
+function finishTimer(){
+  document.getElementById('timer-overlay')?.remove();
+  askRPEThenComplete();
+}
+function renderTimerScreen(){
+  document.getElementById('timer-overlay')?.remove();
+  const step = timerState.queue[timerState.idx];
+  const el = document.createElement('div');
+  el.className='timer-screen';
+  el.id='timer-overlay';
+  const label = step.rest ? 'REST' : (step.kind==='reps' ? EXO[step.ex.key].name.toUpperCase() : EXO[step.ex.key].name.toUpperCase());
+  const sub = step.rest ? '' : `SET ${step.setIdx+1} / ${step.totalSets}${step.kind==='reps' ? ' · '+step.ex.reps+' REPS':''}`;
+  el.innerHTML = `
+    <div class="timer-top">
+      <button class="btn btn-ghost btn-sm" id="timer-exit">Exit</button>
+      <div class="pill">${step.rest?'RESTING':'ACTIVE'}</div>
+    </div>
+    <div class="timer-mid">
+      <div class="eyebrow">${sub}</div>
+      <h2 style="font-size:22px; margin-bottom:20px;">${label}</h2>
+      <div class="ring-wrap">
+        <svg width="230" height="230">
+          <circle cx="115" cy="115" r="100" stroke="rgba(63,227,255,0.15)" stroke-width="10" fill="none"/>
+          <circle id="ring-progress" cx="115" cy="115" r="100" stroke="${step.rest?'#ffb020':'#3fe3ff'}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="628" stroke-dashoffset="0" style="filter:drop-shadow(0 0 8px ${step.rest?'rgba(255,176,32,.6)':'rgba(63,227,255,.6)'})"/>
+        </svg>
+        <div class="ring-num"><div class="t" id="timer-readout">${fmtTime(timerState.remaining)}</div><div class="l">${step.kind==='reps' && !step.rest ? 'Tap done when finished':'Remaining'}</div></div>
+      </div>
+      ${!step.rest && step.kind==='reps' ? `<button class="btn btn-solid" id="reps-done" style="padding:12px 30px;">Mark Set Done</button>` : ''}
+    </div>
+    <div class="timer-controls">
+      <button class="btn btn-ghost" id="timer-prev">Prev</button>
+      <button class="btn ${timerState.running?'btn-solid':'btn-ghost'}" id="timer-pause" style="flex:1.4;">${timerState.running?'Pause':'Resume'}</button>
+      <button class="btn btn-ghost" id="timer-skip">Skip</button>
+    </div>
+  `;
+  document.getElementById('overlay-root').appendChild(el);
+  document.getElementById('timer-exit').onclick = ()=>{ clearInterval(timerState.interval); el.remove(); };
+  document.getElementById('timer-pause').onclick = ()=>{ timerState.running=!timerState.running; renderTimerScreen(); };
+  document.getElementById('timer-skip').onclick = ()=> advanceTimerStep();
+  document.getElementById('timer-prev').onclick = ()=>{
+    if(timerState.idx>0){ timerState.idx-=1; timerState.remaining = timerState.queue[timerState.idx].dur; renderTimerScreen(); }
+  };
+  const repsBtn = document.getElementById('reps-done');
+  if(repsBtn) repsBtn.onclick = ()=> advanceTimerStep();
+  updateTimerDisplay();
+}
+function updateTimerDisplay(){
+  const readout = document.getElementById('timer-readout');
+  if(!readout) return;
+  readout.textContent = fmtTime(Math.max(0,timerState.remaining));
+  const step = timerState.queue[timerState.idx];
+  const ring = document.getElementById('ring-progress');
+  if(ring){
+    const pct = Math.max(0, timerState.remaining/step.dur);
+    ring.setAttribute('stroke-dashoffset', String(628*(1-pct)));
+  }
+}
+
+/* ---------- Boot ---------- */
+function init(){
+  const existed = load();
+  if(existed && state.onboarded){
+    renderApp();
+  } else {
+    OB.step = 0;
+    renderOnboarding();
+    // hook up event delegation for onboarding after each render
+    const obs = new MutationObserver(()=> bindOnboardingStep());
+    obs.observe(document.getElementById('onboarding'), {childList:true, subtree:true});
+    bindOnboardingStep();
+  }
+}
+init();
+</script>
+</body>
+</html>
