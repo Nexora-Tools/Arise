@@ -1,4 +1,4 @@
-# Website : https://nexora-tools.github.io/Arise/
+\# Website : https://nexora-tools.github.io/Arise/
 
 # ⚔️ ARISE // THE SYSTEM
 
